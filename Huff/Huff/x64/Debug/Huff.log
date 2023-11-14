@@ -1,0 +1,3 @@
+﻿  Huff.cpp
+C:\Users\garre\source\repos\Huff\Huff\Huff.cpp(36,16): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
+  Huff.vcxproj -> C:\Users\garre\source\repos\Huff\x64\Debug\Huff.exe
