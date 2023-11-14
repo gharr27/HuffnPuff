@@ -1,0 +1,4 @@
+﻿  Huff.cpp
+C:\Users\garre\source\repos\HuffnPuff\Huff\Huff.cpp(122,9): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\garre\source\repos\HuffnPuff\Huff\Huff.cpp(123,9): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  Huff.vcxproj -> C:\Users\garre\source\repos\HuffnPuff\x64\Debug\Huff.exe
