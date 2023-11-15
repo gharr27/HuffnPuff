@@ -23,6 +23,8 @@ using std::vector;
 //End Goal: Create new compressed file with .huf extension
 //Structure: Header Metadata, Compressed Data
 
+const int EOFVALUE = 256;
+
 class HuffNode {
 public:
 	int glyph;
@@ -31,10 +33,10 @@ public:
 	int rPtr;
 
 	HuffNode() {
-		this->glyph = 0;
-		this->freq = 0;
-		this->lPtr = 0;
-		this->rPtr = 0;
+		this->glyph = NULL;
+		this->freq = NULL;
+		this->lPtr = NULL;
+		this->rPtr = NULL;
 	}
 
 	HuffNode(int glyph, int freq) {
@@ -90,17 +92,17 @@ int main() {
 
 		map<int, int> glyphMap;
 
-		for (int i = 0; i < fileSize; i++) {
-			char glyph;
-			fin >> std::noskipws >> glyph;
-
-			auto result = glyphMap.insert({ (int)glyph, 1});
+		char glyph;
+		while (fin.get(glyph)) {
+			auto result = glyphMap.insert({ (int)glyph, 1 });
 
 			if (!result.second) {
 				//Increment at result.first
 				result.first->second++;
 			}
 		}
+
+		glyphMap.insert({ EOFVALUE, 1 });
 
 		//print glyph map
 		for(auto glyph : glyphMap) {
@@ -137,18 +139,18 @@ int main() {
 
 			//Move M to F (push_back)
 			huffTable.push_back(huffTable[M]);
-			huffTable[M].clearNode();
+			huffTable[M] = HuffNode();
 
 			//If M < H; Move H to M
 			if (M < H) {
 				huffTable[M] = huffTable[H];
-				huffTable[H].clearNode();
+				huffTable[H] = HuffNode();
 			}
 			//Reheap if Necessary
 			Reheap(huffTable, H);
 			//Move indx 0 to H
 			huffTable[H] = huffTable[0];
-			huffTable[0].clearNode();
+			huffTable[0] = HuffNode();
 			//Create Freq Node,Glyph = -1, Freq = H Freq + F Freq, lPtr = H, rPtr = F
 			huffTable[0] = HuffNode(-1, huffTable[H].freq + huffTable[F].freq, H, F);
 			//Reheap if Necessary
@@ -164,7 +166,7 @@ int main() {
 			else {
 				M = 2;
 			}
-		} while (M >= H);
+		} while (H >= M);
 		
 		for (const auto& huffNode : huffTable) {
 			cout << huffNode << endl;
@@ -186,21 +188,18 @@ void Reheap(vector<HuffNode>& huffTable, int length) {
 	do {
 		didChange = false;
 
-		for (int i = 0; i < length; i++) {
-			if (huffTable[i].freq < huffTable[2 * i + 1].freq) {
+		for (int i = 0; (2 * i + 2) < length; i++) {
+			if (huffTable[i].freq > huffTable[2 * i + 1].freq && huffTable[i].freq != 0 && huffTable[2 * i + 1].freq != 0) {
 				HuffNode temp = huffTable[i];
 				huffTable[i] = huffTable[2 * i + 1];
 				huffTable[2 * i + 1] = temp;
 				didChange = true;
 			}
-			if (huffTable[i].freq < huffTable[2 * i + 2].freq) {
+			if (huffTable[i].freq > huffTable[2 * i + 2].freq && huffTable[i].freq != 0 && huffTable[2 * i + 2].freq != 0) {
 				HuffNode temp = huffTable[i];
 				huffTable[i] = huffTable[2 * i + 2];
-				huffTable[2 * i + 1] = temp;
+				huffTable[2 * i + 2] = temp;
 				didChange = true;
-			}
-			else {
-				break;
 			}
 		}
 	} while (didChange);
@@ -213,7 +212,7 @@ void huffCodes()
 {
 	//make a min heap
 	//comparison operator for huffs
-	priority_queue<> leafNodes;
+	//priority_queue<> leafNodes;
 
 }
 
