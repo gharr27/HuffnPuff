@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <queue>
 
 using std::cin;
 using std::cout;
@@ -12,6 +13,7 @@ using std::ifstream;
 using std::ios;
 using std::map;
 using std::ofstream;
+using std::priority_queue;
 using std::sort;
 using std::streamoff;
 using std::string;
@@ -100,6 +102,7 @@ int main() {
 			}
 		}
 
+		//print glyph map
 		for(auto glyph : glyphMap) {
 			cout << glyph.first << " " << glyph.second << endl;
 
@@ -203,4 +206,14 @@ void Reheap(vector<HuffNode>& huffTable, int length) {
 	} while (didChange);
 }
 
+
+
+//Generate Huffman Codes
+void huffCodes()
+{
+	//make a min heap
+	//comparison operator for huffs
+	priority_queue<> leafNodes;
+
+}
 
