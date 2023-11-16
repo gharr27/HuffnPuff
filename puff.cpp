@@ -77,7 +77,7 @@ int main()
 	//Read the compressed data as hex numbers and store them in a vector
 	vector<int> hexNums;
 	ifstream::pos_type size;
-	unsigned char hexNum;
+	char hexNum;
 	while (fin.read(reinterpret_cast<char*>(&hexNum), sizeof(hexNum))) {
 		hexNums.push_back(hexNum);
 	}
@@ -99,7 +99,7 @@ int main()
 
 
 	//Create the output file
-	ofstream fout(name, ios::out);
+	ofstream fout(name, ios::binary);
 
 	if (fout.fail()) {
 		cout << "File not created" << endl;
@@ -129,7 +129,8 @@ int main()
 					eofFound = true;
 				}
 				else {
-					fout << (char)curr.glyph;
+					char g = (char)curr.glyph;
+					fout.write((char*)&g, sizeof g);
 					curr = huffmanTable.at(0);
 				}
 			}
