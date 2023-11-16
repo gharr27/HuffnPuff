@@ -55,9 +55,9 @@ public:
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const HuffNode& node) {
-		os << std::hex << node.glyph 
-		   << std::hex << node.lPtr
-		   << std::hex << node.rPtr;
+		os << node.glyph 
+		   << node.lPtr
+		   << node.rPtr;
 		return os;
 	}
 
@@ -98,8 +98,9 @@ int main() {
 
 		map<int, int> glyphMap;
 
-		char glyph;
-		while (fin.get(glyph)) {
+		unsigned char glyph;
+		while (fin.read(reinterpret_cast<char*>(&glyph), sizeof(unsigned char)))
+		{
 			auto result = glyphMap.insert({ (int)glyph, 1 });
 
 			if (!result.second) {
@@ -207,11 +208,12 @@ int main() {
 		foust.write(fileName.c_str(), fileNameSize);
 
 		//output the Huffman table size
-		foust.write(reinterpret_cast<const char*>(&tableSize), sizeof(tableSize));
+		int huffTableSize = huffTable.size();
+		foust.write(reinterpret_cast<const char*>(&huffTableSize), sizeof(huffTableSize));
 
 		//output the Huffman table
 		for (const auto& huffNode : huffTable) {
-			foust << huffNode;
+			foust.write(reinterpret_cast<const char*>(&huffNode), sizeof(huffNode));
 		}
 
 
