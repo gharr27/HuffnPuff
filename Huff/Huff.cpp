@@ -28,8 +28,8 @@ const int EOFVALUE = 256;
 
 class HuffNode {
 public:
-	int glyph;
-	int freq;
+	unsigned char glyph;
+	unsigned int freq;
 	int lPtr;
 	int rPtr;
 
@@ -86,7 +86,7 @@ int main() {
 	cout << "Name of file you want to Huff: ";
 	cin >> fileName;
 	
-	fin.open(fileName, ios::in);
+	fin.open(fileName, ios::in | ios::binary);
 
 	if (fin.is_open()) {
 
@@ -96,12 +96,12 @@ int main() {
 		streamoff fileSize = fin.tellg();
 		fin.seekg(0, ios::beg);
 
-		map<int, int> glyphMap;
+		map<unsigned char, unsigned int> glyphMap;
 
 		unsigned char glyph;
 		while (fin.read(reinterpret_cast<char*>(&glyph), sizeof(unsigned char)))
 		{
-			auto result = glyphMap.insert({ (int)glyph, 1 });
+			auto result = glyphMap.insert({ glyph, 1 });
 
 			if (!result.second) {
 				//Increment at result.first
