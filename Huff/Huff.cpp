@@ -8,6 +8,7 @@
 
 using std::cin;
 using std::cout;
+using std::cerr;
 using std::endl;
 using std::ifstream;
 using std::ios;
@@ -70,6 +71,12 @@ public:
 };
 
 void Reheap(vector<HuffNode>& huffTable, int length);
+
+void hufOut()
+{
+
+}
+
 
 int main() {
 
@@ -171,11 +178,50 @@ int main() {
 		for (const auto& huffNode : huffTable) {
 			cout << huffNode << endl;
 		}
+
+
+		//find the file extension in fileName and remove it
+		size_t periodLoc = fileName.find('.');
+		string hufName;
+
+		if (periodLoc != string::npos)
+		{
+			hufName = fileName.substr(0, periodLoc) + ".huf";
+		}
+		else
+		{
+			hufName = fileName + ".huf";
+		}
+		
+		//open .huf file for output
+		foust.open(hufName, ios::out | ios::binary);
+		if (!foust.is_open())
+		{
+			cerr << "ERROR OPENING .huf FILE." << endl << endl << "DELETING SYSTEM32..." << endl;
+			EXIT_FAILURE;
+		}
+
+		//write the file name size and then the file name to the .huf file
+		int fileNameSize = fileName.size();
+		foust.write(reinterpret_cast<const char*>(&fileNameSize), sizeof(fileNameSize));
+		foust.write(fileName.c_str(), fileNameSize);
+
+		//output the Huffman table size
+		foust.write(reinterpret_cast<const char*>(&tableSize), sizeof(tableSize));
+
+		//output the Huffman table
+
+
+
+
+
 	}
 	else {
 		cout << "Failed to connect to file: " << fileName << endl;
 		cout << "Deleting System32..." << endl;
+		EXIT_FAILURE;
 	}
+
 
 	return 0;
 }
