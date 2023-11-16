@@ -55,10 +55,9 @@ public:
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const HuffNode& node) {
-		os << "Glyph: " << node.glyph 
-			<< ", Freq: " << node.freq 
-			<< ", Left Pointer: " << node.lPtr 
-			<< ", Right Pointer: " << node.rPtr;
+		os << std::hex << node.glyph 
+		   << std::hex << node.lPtr
+		   << std::hex << node.rPtr;
 		return os;
 	}
 
@@ -202,6 +201,7 @@ int main() {
 		}
 
 		//write the file name size and then the file name to the .huf file
+		//.write vs <<???
 		int fileNameSize = fileName.size();
 		foust.write(reinterpret_cast<const char*>(&fileNameSize), sizeof(fileNameSize));
 		foust.write(fileName.c_str(), fileNameSize);
@@ -210,8 +210,9 @@ int main() {
 		foust.write(reinterpret_cast<const char*>(&tableSize), sizeof(tableSize));
 
 		//output the Huffman table
-
-
+		for (const auto& huffNode : huffTable) {
+			foust << huffNode;
+		}
 
 
 
