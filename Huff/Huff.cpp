@@ -33,24 +33,24 @@ class HuffNode {
 public:
 	unsigned char glyph;
 	unsigned int freq;
-	HuffNode* lPtr;
-	HuffNode* rPtr;
+	int lPtr;
+	int rPtr;
 
 	HuffNode() {
 		this->glyph = NULL;
 		this->freq = NULL;
-		this->lPtr = nullptr;
-		this->rPtr = nullptr;
+		this->lPtr = NULL;
+		this->rPtr = NULL;
 	}
 
 	HuffNode(unsigned char glyph, int freq) {
 		this->glyph = glyph;
 		this->freq = freq;
-		this->lPtr = nullptr;
-		this->rPtr = nullptr;
+		this->lPtr = -1;
+		this->rPtr = -1;
 	}
 
-	HuffNode(unsigned char glyph, int freq, HuffNode* lPtr, HuffNode* rPtr) {
+	HuffNode(unsigned char glyph, int freq, int lPtr, int rPtr) {
 		this->glyph = glyph;
 		this->freq = freq;
 		this->lPtr = lPtr;
@@ -97,8 +97,8 @@ void GenerateCodes(HuffNode* root, string code, unordered_map<unsigned char, str
 		huffTable[root->glyph] = code;
 	}
 
-	GenerateCodes(root->lPtr, code + "0", huffTable);
-	GenerateCodes(root->rPtr, code + "1", huffTable);
+	/*GenerateCodes(root->lPtr, code + "0", huffTable);
+	GenerateCodes(root->rPtr, code + "1", huffTable);*/
 
 }
 
@@ -118,18 +118,20 @@ unordered_map<unsigned char, string> BuildHuffTable(map<unsigned char, unsigned 
 		minHeap.pop();
 
 		HuffNode* newNode = new HuffNode('-1', left->freq + right->freq);
-		newNode->lPtr = left;
-		newNode->rPtr = right;
+		/*newNode->lPtr = left;
+		newNode->rPtr = right;*/
 		minHeap.push(newNode);
 	}
 
 	//add to a vector and pass to output
-	//remove copy
-
-	priority_queue<HuffNode*, vector<HuffNode*>, compNodes> minHeap2 = minHeap;
+	
 
 	unordered_map<unsigned char, string> huffTable;
-	GenerateCodes(minHeap2.top(), "", huffTable);
+	GenerateCodes(minHeap.top(), "", huffTable);
+
+	for (auto nodes : huffTable) {
+		cout << nodes.first << " " << nodes.second << endl;
+	}
 
 	return huffTable;
 }
@@ -179,24 +181,23 @@ int main() {
 
 		//Build Initial Huffman Table
 		const size_t tableSize = glyphMap.size() + (glyphMap.size() - 1);
-		//vector<HuffNode> huffTable;
+		vector<HuffNode> huffTable;
 
-	/*	for (const auto& glyph : glyphMap) {
+		for (const auto& glyph : glyphMap) {
 			huffTable.push_back(HuffNode(glyph.first, glyph.second));
 		}
 
 		sort(huffTable.begin(), huffTable.end(), [](HuffNode a, HuffNode b) {
 				return a.freq < b.freq;
-			});*/
+			});
 
 
 		//make a huff tree
-		priority_queue<HuffNode*, vector<HuffNode*>, compNodes> minHeap;
+		//priority_queue<HuffNode*, vector<HuffNode*>, compNodes> minHeap;
 
-		unordered_map<unsigned char, string> huffTable = BuildHuffTable(glyphMap, minHeap);
+		//unordered_map<unsigned char, string> huffTable = BuildHuffTable(glyphMap, minHeap);
 
 
-		/* COMMENTED OUT TO ATTEMPT A NEW METHOD OF HUFFING
 		//Build Huffman Table
 		int M = 0;
 		int H = glyphMap.size() -1;
@@ -235,7 +236,7 @@ int main() {
 			//Increment F
 			F++;
 
-			if (huffTable[1].freq <= huffTable[2].freq) {
+			if (huffTable[1].freq <= huffTable[2].freq || F == (glyphMap.size() - 1) * 2) {
 				M = 1;
 			}
 			else {
@@ -246,7 +247,6 @@ int main() {
 		for (const auto& huffNode : huffTable) {
 			cout << huffNode << endl;
 		}
-		*/
 
 
 
@@ -283,13 +283,18 @@ int main() {
 		int huffTableSize = huffTable.size();
 		foust.write(reinterpret_cast<const char*>(&huffTableSize), sizeof(huffTableSize));
 
+		cout << endl;
 		//output the Huffman table
-		while (!minHeap.empty())
+		for (auto node : huffTable) {
+			foust << node << endl;
+		}
+
+		/*while (!minHeap.empty())
 		{
 			auto huffNode = minHeap.top();
 			minHeap.pop();
 			foust.write(reinterpret_cast<const char*>(huffNode), sizeof(huffNode));
-		}
+		}*/
 		
 
 
