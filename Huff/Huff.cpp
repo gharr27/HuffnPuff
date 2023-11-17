@@ -32,7 +32,7 @@ const int NODEVALUE = -1;
 
 class HuffNode {
 public:
-	unsigned char glyph;
+	int glyph;
 	bool isNode;
 	unsigned int freq;
 	int lPtr;
@@ -222,15 +222,27 @@ int main() {
 
 		//LOOP
 		do{
+			if (H > 2 || huffTable.at(1).freq < huffTable.at(2).freq)
+			{
+				M = 1;
+			}
+			else
+			{
+				M = 2;
+			}
 			//MOVE M TO F
 			huffTable.push_back(huffTable.at(M));
 				//M is now empty
 			huffTable.at(M) = HuffNode();
 
 			//MOVE H TO M
-			huffTable.at(M) = huffTable.at(H);
+			if (M < H)
+			{
+				huffTable.at(M) = huffTable.at(H);
 				//H is now empty
-			huffTable.at(H) = HuffNode();
+				huffTable.at(H) = HuffNode();
+				Reheap(huffTable, H - 1);
+			}
 
 			tempNode = huffTable.at(M);
 			huffTable.at(M) = huffTable.at(H - 1);
@@ -249,9 +261,8 @@ int main() {
 
 			H--;
 			F++;
+
 		} while (H >= 1);
-
-
 
 
 
