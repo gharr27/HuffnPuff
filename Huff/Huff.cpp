@@ -28,10 +28,12 @@ using std::vector;
 //Structure: Header Metadata, Compressed Data
 
 const int EOFVALUE = 256;
+const int NODEVALUE = -1;
 
 class HuffNode {
 public:
 	unsigned char glyph;
+	bool isNode;
 	unsigned int freq;
 	int lPtr;
 	int rPtr;
@@ -41,6 +43,7 @@ public:
 		this->freq = NULL;
 		this->lPtr = NULL;
 		this->rPtr = NULL;
+		this->isNode = false;
 	}
 
 	HuffNode(unsigned char glyph, int freq) {
@@ -48,6 +51,7 @@ public:
 		this->freq = freq;
 		this->lPtr = -1;
 		this->rPtr = -1;
+		this->isNode = false;
 	}
 
 	HuffNode(unsigned char glyph, int freq, int lPtr, int rPtr) {
@@ -55,12 +59,23 @@ public:
 		this->freq = freq;
 		this->lPtr = lPtr;
 		this->rPtr = rPtr;
+		this->isNode = false;
+	}
+
+	HuffNode(int freq, int lPtr, int rPtr, bool isNode) {
+		this->glyph = -1;
+		this->freq = freq;
+		this->lPtr = lPtr;
+		this->rPtr = rPtr;
+		this->isNode = isNode;
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const HuffNode& node) {
-		os << node.glyph 
-		   << node.lPtr
-		   << node.rPtr;
+		
+		os << static_cast<int>(node.glyph)
+		   << static_cast<int>(node.lPtr)
+		   << static_cast<int>(node.rPtr);
+
 		return os;
 	}
 
@@ -124,7 +139,7 @@ unordered_map<unsigned char, string> BuildHuffTable(map<unsigned char, unsigned 
 	}
 
 	//add to a vector and pass to output
-	
+
 
 	unordered_map<unsigned char, string> huffTable;
 	GenerateCodes(minHeap.top(), "", huffTable);
@@ -144,10 +159,10 @@ int main() {
 	string fileName;
 	ifstream fin;
 	ofstream foust;
-	
+
 	cout << "Name of file you want to Huff: ";
 	cin >> fileName;
-	
+
 	fin.open(fileName, ios::in | ios::binary);
 
 	if (fin.is_open()) {
@@ -174,10 +189,11 @@ int main() {
 		glyphMap.insert({ EOFVALUE, 1 });
 
 		//print glyph map
-		for(auto glyph : glyphMap) {
+		for (auto glyph : glyphMap) {
 			cout << glyph.first << " " << glyph.second << endl;
 
 		}
+		cout << "GLYPH TEST " << glyphMap.size() << endl;
 
 		//Build Initial Huffman Table
 		const size_t tableSize = glyphMap.size() + (glyphMap.size() - 1);
@@ -188,7 +204,7 @@ int main() {
 		}
 
 		sort(huffTable.begin(), huffTable.end(), [](HuffNode a, HuffNode b) {
-				return a.freq < b.freq;
+			return a.freq < b.freq;
 			});
 
 
@@ -200,12 +216,9 @@ int main() {
 
 		//Build Huffman Table
 		int M = 0;
-		int H = glyphMap.size() -1;
+		int H = glyphMap.size() - 1;
 		int F = huffTable.size();
 
-
-		do {
-			//M = lower freq of indx 1 and 2
 			if (huffTable[1].freq <= huffTable[2].freq) {
 				M = 1;
 			}
@@ -213,7 +226,13 @@ int main() {
 				M = 2;
 			}
 
+		do {
+			//M = lower freq of indx 1 and 2
+			//mark(M) lower of slots 1 and 2 (merge node)
+
 			//Move M to F (push_back)
+			//Move M to next free slot (F)
+			 
 			huffTable.push_back(huffTable[M]);
 			huffTable[M] = HuffNode();
 
@@ -228,7 +247,7 @@ int main() {
 			huffTable[H] = huffTable[0];
 			huffTable[0] = HuffNode();
 			//Create Freq Node,Glyph = -1, Freq = H Freq + F Freq, lPtr = H, rPtr = F
-			huffTable[0] = HuffNode(-1, huffTable[H].freq + huffTable[F].freq, H, F);
+			huffTable[0] = HuffNode(huffTable[H].freq + huffTable[F].freq, H, F, true); //NOTE
 			//Reheap if Necessary
 			Reheap(huffTable, H);
 			//Decrement H
@@ -243,7 +262,7 @@ int main() {
 				M = 2;
 			}
 		} while (H >= M);
-		
+
 		for (const auto& huffNode : huffTable) {
 			cout << huffNode << endl;
 		}
@@ -264,7 +283,7 @@ int main() {
 		{
 			hufName = fileName + ".huf";
 		}
-		
+
 		//open .huf file for output
 		foust.open(hufName, ios::out | ios::binary);
 		if (!foust.is_open())
@@ -274,7 +293,7 @@ int main() {
 		}
 
 		//write the file name size and then the file name to the .huf file
-	
+
 		int fileNameSize = fileName.size();
 		foust.write(reinterpret_cast<const char*>(&fileNameSize), sizeof(fileNameSize));
 		foust.write(fileName.c_str(), fileNameSize);
@@ -286,8 +305,9 @@ int main() {
 		cout << endl;
 		//output the Huffman table
 		for (auto node : huffTable) {
-			foust << node << endl;
+			foust.write(reinterpret_cast<const char*>(&node), sizeof(node));
 		}
+		cout << "TEST " << huffTable.size();
 
 		/*while (!minHeap.empty())
 		{
@@ -295,8 +315,6 @@ int main() {
 			minHeap.pop();
 			foust.write(reinterpret_cast<const char*>(huffNode), sizeof(huffNode));
 		}*/
-		
-
 
 
 	}
@@ -334,15 +352,3 @@ void Reheap(vector<HuffNode>& huffTable, int length) {
 		}
 	} while (didChange);
 }
-
-
-
-//Generate Huffman Codes
-void huffCodes()
-{
-	//make a min heap
-	//comparison operator for huffs
-	//priority_queue<> leafNodes;
-
-}
-
