@@ -215,18 +215,54 @@ int main() {
 
 
 		//Build Huffman Table
-		int M = 0;
+		int M = 1;
 		int H = glyphMap.size() - 1;
 		int F = huffTable.size();
+		HuffNode tempNode;
 
-			if (huffTable[1].freq <= huffTable[2].freq) {
-				M = 1;
+		//LOOP
+		do{
+			//MOVE M TO F
+			huffTable.push_back(huffTable.at(M));
+				//M is now empty
+			huffTable.at(M) = HuffNode();
+
+			//MOVE H TO M
+			huffTable.at(M) = huffTable.at(H);
+				//H is now empty
+			huffTable.at(H) = HuffNode();
+
+			tempNode = huffTable.at(M);
+			huffTable.at(M) = huffTable.at(H - 1);
+			huffTable.at(H - 1) = tempNode;
+
+			huffTable.at(H) = huffTable.at(0);
+			huffTable.at(0) = HuffNode();
+
+			//create freq node in slot 0
+			huffTable.at(0).freq = huffTable.at(H).freq + huffTable.at(F).freq;
+			huffTable.at(0).lPtr = H;
+			huffTable.at(0).rPtr = F;
+			huffTable.at(0).glyph = (int) -1;
+
+			Reheap(huffTable, F);
+
+			H--;
+			F++;
+		} while (H >= 1);
+
+
+
+
+
+			/*if (huffTable[1].freq <= huffTable[2].freq) {
+			//	M = 1;
 			}
 			else {
 				M = 2;
-			}
+			}*/
 
-		do {
+		/*do {
 			//M = lower freq of indx 1 and 2
 			//mark(M) lower of slots 1 and 2 (merge node)
 
@@ -263,6 +299,7 @@ int main() {
 			}
 			
 		} while (H >= M); // why not run glyphTable.size() -1 times?
+		*/
 
 		for (const auto& huffNode : huffTable) {
 			cout << huffNode << endl;
@@ -306,7 +343,9 @@ int main() {
 		cout << endl;
 		//output the Huffman table
 		for (auto node : huffTable) {
-			foust.write(reinterpret_cast<const char*>(&node), sizeof(node));
+			foust.write((char*)(&node.glyph), sizeof(node.glyph));
+			foust.write((char*)(&node.rPtr), sizeof(node.rPtr));
+			foust.write((char*)(&node.lPtr), sizeof(node.lPtr));
 		}
 		cout << "TEST " << huffTable.size();
 
