@@ -261,7 +261,8 @@ int main() {
 			else {
 				M = 2;
 			}
-		} while (H >= M);
+			
+		} while (H >= M); // why not run glyphTable.size() -1 times?
 
 		for (const auto& huffNode : huffTable) {
 			cout << huffNode << endl;
